@@ -8,3 +8,26 @@ bool Engine::ProcessMessages()
 {
     return this->render_window.ProcessMessages();
 }
+
+void Engine::Update()
+{
+	while (!keyboard.CharBufferIsEmpty())
+	{
+		unsigned char ch = keyboard.ReadChar();
+		std::string outmsg = "char:";
+		outmsg += ch;
+		outmsg += "\n";
+		OutputDebugStringA(outmsg.c_str());
+
+	}
+
+	while (!keyboard.KeyBufferIsEmpty())
+	{
+		KeyboardEvent kbe = keyboard.ReadKey();
+		unsigned char keycode = kbe.GetKeyCode();
+		std::string outmsg = "keycode:";
+		outmsg += keycode;
+		outmsg += "\n";
+		OutputDebugStringA(outmsg.c_str());
+	}
+}
