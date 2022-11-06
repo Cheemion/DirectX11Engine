@@ -9,6 +9,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	engine.Initialize(hInstance, "Titie", "MyClass", 800, 600);
 	while (engine.ProcessMessages() == true) {
 		engine.Update();
+		engine.RenderFrame();
 	}
 	return 0;
 }

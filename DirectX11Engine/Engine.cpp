@@ -47,3 +47,8 @@ void Engine::Update()
 		OutputDebugStringA(outmsg.c_str());
 	}
 }
+
+void Engine::RenderFrame()
+{
+	gfx.RenderFrame();
+}
