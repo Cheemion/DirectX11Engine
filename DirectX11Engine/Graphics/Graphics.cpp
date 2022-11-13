@@ -22,6 +22,7 @@ void Graphics::RenderFrame()
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	this->deviceContext->VSSetShader(vertexshader.GetShader(), NULL, 0);
 	this->deviceContext->PSSetShader(pixelshader.GetShader(), NULL, 0);
+	this->deviceContext->RSSetState(this->rasterizerState.Get());
 	
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -108,7 +109,16 @@ bool Graphics::InitializeDirectX(HWND hwnd, int width, int height)
 	viewport.Width = width;
 	viewport.Height = height;
 	this->deviceContext->RSSetViewports(1, &viewport);
-
+	
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	hr = this->device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorLogger::Log(hr, "Failed to create rasterizer state");
+		return false;
+	}
 	
 	return true;
 }
