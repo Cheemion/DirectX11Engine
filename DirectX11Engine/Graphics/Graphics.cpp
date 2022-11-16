@@ -31,6 +31,8 @@ void Graphics::RenderFrame()
 	UINT offset = 0;
 	this->deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 	this->deviceContext->Draw(3, 0);
+
+
 	this->swapchain->Present(1, NULL);
 }
 
@@ -166,7 +168,6 @@ bool Graphics::InitializeDirectX(HWND hwnd, int width, int height)
 		ErrorLogger::Log(hr, "Failed to create rasterizer state");
 		return false;
 	}
-	
 	return true;
 }
 

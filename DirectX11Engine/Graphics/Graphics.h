@@ -2,7 +2,9 @@
 #include "AdapterReader.h"
 #include "Shaders.h"
 #include "Vertex.h"
-
+#include <memory>
+#include <SpriteBatch.h>
+#include <SpriteFont.h>
 class Graphics
 {
 public:
@@ -26,5 +28,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-
+	
 };
