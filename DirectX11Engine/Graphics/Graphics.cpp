@@ -16,23 +16,22 @@ bool Graphics::Initialize(HWND hwnd, int width, int height)
 
 void Graphics::RenderFrame()
 {
-	float bgcolor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float bgcolor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
 	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgcolor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	this->deviceContext->IASetInputLayout(this->vertexshader.GetInputLayout());
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
 	this->deviceContext->VSSetShader(vertexshader.GetShader(), NULL, 0);
 	this->deviceContext->PSSetShader(pixelshader.GetShader(), NULL, 0);
 	this->deviceContext->RSSetState(this->rasterizerState.Get());
 	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
-	
+	this->deviceContext->PSSetShaderResources(0, 1, this->myTexture.GetAddressOf());
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	this->deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	this->deviceContext->Draw(3, 0);
-
-
+	this->deviceContext->Draw(6, 0);
 	this->swapchain->Present(1, NULL);
 }
 
@@ -168,6 +167,23 @@ bool Graphics::InitializeDirectX(HWND hwnd, int width, int height)
 		ErrorLogger::Log(hr, "Failed to create rasterizer state");
 		return false;
 	}
+
+	//Create sampler description for sampler state
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = this->device->CreateSamplerState(&sampDesc, this->samplerState.GetAddressOf()); //Create sampler state
+	if (FAILED(hr))
+	{
+		ErrorLogger::Log(hr, "Failed to create sampler state.");
+		return false;
+	}
 	return true;
 }
 
@@ -177,18 +193,20 @@ bool Graphics::InitializeShaders()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"COLOR", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
 
 	if (!vertexshader.Initialize(this->device, L"..\\x64\\Debug\\vertexshader.cso", layout, numElements))
 	{
-		return false;
+		if (!vertexshader.Initialize(this->device, L"..\\x64\\Release\\vertexshader.cso", layout, numElements))
+			return false;
 	}
 	if (!pixelshader.Initialize(this->device, L"..\\x64\\Debug\\pixelshader.cso"))
 	{
-		return false;
+		if (!pixelshader.Initialize(this->device, L"..\\x64\\Release\\pixelshader.cso"))
+			return false;
 	}
 
 	return true;
@@ -197,11 +215,17 @@ bool Graphics::InitializeShaders()
 
 bool Graphics::InitializeScene()
 {
+	//Textured Square
 	Vertex v[] =
 	{
-		Vertex(-0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f), //Center Point
-		Vertex( 0.0f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f), //Center Point
-		Vertex( 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f), //Center Point
+		Vertex(-0.5f,  -0.5f, 1.0f, 0.0f, 1.0f), //Bottom Left 
+		Vertex(-0.5f,   0.5f, 1.0f, 0.0f, 0.0f), //Top Left
+		Vertex(0.5f,   0.5f, 1.0f, 1.0f, 0.0f), //Top Right
+
+		Vertex(-0.5f, -0.5f, 1.0f, 0.0f, 1.0f), //Bottom Left 
+		Vertex(0.5f,   0.5f, 1.0f, 1.0f, 0.0f), //Top Right
+		Vertex(0.5f,  -0.5f, 1.0f, 1.0f, 1.0f), //Bottom Right
+
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -223,6 +247,13 @@ bool Graphics::InitializeScene()
 		ErrorLogger::Log(hr, "Failed to create vertex buffer.");
 		return false;
 	}
+	
 
+	hr = DirectX::CreateWICTextureFromFile(this->device.Get(), L"Data\\Textures\\haha.png", nullptr, myTexture.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::Log(hr, "Failed to create wic texture from file.");
+		return false;
+	}
 	return true;
 }
