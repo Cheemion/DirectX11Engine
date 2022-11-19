@@ -4,6 +4,9 @@
 #include "Vertex.h"
 #include <memory>
 #include <WICTextureLoader.h>
+#include <SpriteBatch.h>
+#include <SpriteFont.h>>
+
 class Graphics
 {
 public:
@@ -30,5 +33,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> myTexture;
-	
+
+	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;	
+	std::unique_ptr<DirectX::SpriteFont> spriteFont;	
 };
