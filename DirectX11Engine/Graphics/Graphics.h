@@ -25,6 +25,7 @@ private:
 	PixelShader  pixelshader;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> indicesBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
@@ -36,4 +37,6 @@ private:
 
 	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;	
 	std::unique_ptr<DirectX::SpriteFont> spriteFont;	
+
+
 };
