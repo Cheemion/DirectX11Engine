@@ -7,6 +7,7 @@
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
 #include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 class Graphics
 {
@@ -26,7 +27,7 @@ private:
 	PixelShader  pixelshader;
 
 	VertexBuffer<Vertex> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indicesBuffer;
+	IndexBuffer indicesBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
